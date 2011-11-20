@@ -231,7 +231,8 @@ Flotr = {
  * Extend a given object recursively with all the properties in passed-in object(s)
  * Dereferences objects and arrays, but not objects/arrays within an array.
  * @param {Object} object - The destination object
- * @return {Object} [source] = Any number of source objects that the destination object inherits from
+ * @param {Object} [source] - Any number of source objects that the destination object inherits from
+ * @return {Object} object - The destination object with all properties merged from sources 
  * @TODO Although not needed for current options, may need true recursive clone for arrays.
 */
 _.deepExtend = function(obj) {
