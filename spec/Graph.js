@@ -44,12 +44,6 @@ describe('Graph', function () {
       expect(a.options.xaxis.tickFormatter).toBeTruthy();
     });
 
-    it('should not affect default options when modifying graph options (arrays)', function() {
-      a = new TestFlotr.Graph(nodeA, d1, options);
-      a.options.colors[1] = '#bada55';
-      expect(TestFlotr.defaultOptions.colors[1]).toNotBe('#bada55');
-    });
-
     it('should not affect default options when modifying graph options (objects)', function() {
       a = new TestFlotr.Graph(nodeA, d1, options);
       a.options.x2axis = {  
@@ -59,6 +53,13 @@ describe('Graph', function () {
       expect(TestFlotr.defaultOptions.xaxis.scaling).toEqual('linear');
       expect(TestFlotr.defaultOptions.x2axis.titleAlign).toBeFalsy();
     });
+    
+    it('should not affect default options when modifying graph options (arrays)', function() {
+      a = new TestFlotr.Graph(nodeA, d1, options);
+      a.options.colors[1] = '#bada55';
+      expect(TestFlotr.defaultOptions.colors[1]).toNotBe('#bada55');
+    });
+
   });
 
   function buildNode () {

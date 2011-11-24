@@ -4,11 +4,10 @@
 (function () {
 
 var
-  D = Flotr.DOM,
-  E = Flotr.EventAdapter,
-  _ = Flotr._;
+  D     = Flotr.DOM,
+  E     = Flotr.EventAdapter,
+  _     = Flotr._;
   flotr = Flotr;
-
 /**
  * Flotr Graph constructor.
  * @param {Element} el - element to insert the graph into
@@ -16,7 +15,7 @@ var
  * @param {Object} options - an object containing options
  */
 Graph = function(el, data, options){
-
+// Let's see if we can get away with out this [JS]
 //  try {
     this._setEl(el);
     this._initMembers();
@@ -44,15 +43,13 @@ Graph = function(el, data, options){
     this.draw(_.bind(function() {
       E.fire(this.el, 'flotr:afterinit', [this]);
     }, this));
-// Let's see if this try is necessary [JS]
 /*
     try {
   } catch (e) {
     try {
       console.error(e);
     } catch (e2) {}
-  }
-*/
+  }*/
 };
 
 Graph.prototype = {
@@ -586,12 +583,10 @@ Graph.prototype = {
    * @param {Object} opts - options object
    */
   _initOptions: function(opts){
-    var defaults = flotr.defaultOptions,
-      moreDefaults = {
-        x2axis : _.extend({}, defaults.xaxis, defaults.x2axis),
-        y2axis : _.extend({}, defaults.yaxis, defaults.y2axis)
-      };
-    this.options = _.deepExtend({}, defaults, moreDefaults, opts);
+    var options = flotr.clone(flotr.defaultOptions);
+    options.x2axis = _.extend(_.clone(options.xaxis), options.x2axis);
+    options.y2axis = _.extend(_.clone(options.yaxis), options.y2axis);
+    this.options = flotr.merge(opts || {}, options);
 
     this.axes = flotr.Axis.getAxes(this.options);
 
