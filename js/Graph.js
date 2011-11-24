@@ -14,7 +14,7 @@ var
  * @param {Object} data - an array or object of dataseries
  * @param {Object} options - an object containing options
  */
-Graph = function(el, data, options){
+Graph = function (el, data, options){
 // Let's see if we can get away with out this [JS]
 //  try {
     this._setEl(el);
@@ -73,7 +73,7 @@ Graph.prototype = {
    * @param {Object} series - the series
    * @return {Object} the graph type
    */
-  getType: function(series){
+  getType: function (series){
     var t = (series && series.type) ? series.type : this.options.defaultType;
     return this[t];
   },
@@ -84,7 +84,7 @@ Graph.prototype = {
    * @param {Array} args  Arguments applied to method.
    * @return executed successfully or failed.
    */
-  executeOnType: function(s, method, args){
+  executeOnType: function (s, method, args){
     var success = false;
     if (!_.isArray(s)) s = [s];
 
@@ -105,7 +105,7 @@ Graph.prototype = {
 
     return success;
   },
-  processColor: function(color, options){
+  processColor: function (color, options){
     var o = { x1: 0, y1: 0, x2: this.plotWidth, y2: this.plotHeight, opacity: 1, ctx: this.ctx };
     _.extend(o, options);
     return flotr.Color.processColor(color, o);
@@ -115,7 +115,7 @@ Graph.prototype = {
    *
    * TODO logarithmic range validation (consideration of 0)
    */
-  findDataRanges: function(){
+  findDataRanges: function (){
     var a = this.axes,
       xaxis, yaxis, range;
 
@@ -131,8 +131,8 @@ Graph.prototype = {
         xaxis.datamax = Math.max(range.xmax, xaxis.datamax);
         yaxis.datamin = Math.min(range.ymin, yaxis.datamin);
         yaxis.datamax = Math.max(range.ymax, yaxis.datamax);
-        xaxis.used = (xaxis.used || range.xused ? true : false);
-        yaxis.used = (yaxis.used || range.yused ? true : false);
+        xaxis.used = (xaxis.used || range.xused);
+        yaxis.used = (yaxis.used || range.yused);
       }
     }, this);
 
@@ -160,19 +160,20 @@ Graph.prototype = {
   /**
    * Calculates axis label sizes.
    */
-  calculateSpacing: function(){
+  calculateSpacing: function (){
 
-    var a = this.axes,
-        options = this.options,
-        series = this.series,
-        margin = options.grid.labelMargin,
-        T = this._text,
-        x = a.x,
-        x2 = a.x2,
-        y = a.y,
-        y2 = a.y2,
-        maxOutset = options.grid.outlineWidth,
-        i, j, l, dim;
+    var
+      options = this.options,
+      margin  = options.grid.labelMargin,
+      maxOutset = options.grid.outlineWidth,
+      series  = this.series,
+      a       = this.axes,
+      T       = this._text,
+      x       = a.x,
+      x2      = a.x2,
+      y       = a.y,
+      y2      = a.y2,
+      i, j, l, dim;
 
     // TODO post refactor, fix this
     _.each(a, function (axis) {
@@ -183,7 +184,7 @@ Graph.prototype = {
     // Title height
     dim = T.dimensions(
       options.title,
-      {size: options.fontSize*1.5},
+      { size: options.fontSize * 1.5 },
       'font-size:1em;font-weight:bold;',
       'flotr-title'
     );
@@ -192,15 +193,15 @@ Graph.prototype = {
     // Subtitle height
     dim = T.dimensions(
       options.subtitle,
-      {size: options.fontSize},
+      { size: options.fontSize },
       'font-size:smaller;',
       'flotr-subtitle'
     );
     this.subtitleHeight = dim.height;
 
-    for(j = 0; j < options.length; ++j){
-      if (series[j].points.show){
-        maxOutset = Math.max(maxOutset, series[j].points.radius + series[j].points.lineWidth/2);
+    for (j = 0; j < options.length; ++j) {
+      if (series[j].points.show) {
+        maxOutset = Math.max(maxOutset, series[j].points.radius + series[j].points.lineWidth / 2);
       }
     }
 
@@ -243,13 +244,13 @@ Graph.prototype = {
   /**
    * Draws grid, labels, series and outline.
    */
-  draw: function(after) {
-    var afterImageLoad = _.bind(function() {
+  draw: function (after) {
+    var g, img, afterImageLoad = _.bind(function () {
 
-      if(this.series.length){
+      if (this.series.length) {
         E.fire(this.el, 'flotr:beforedraw', [this.series, this]);
 
-        for(var i = 0; i < this.series.length; i++){
+        for (var i = 0; i < this.series.length; i++) {
           if (!this.series[i].hide)
             this.drawSeries(this.series[i]);
         }
@@ -260,7 +261,7 @@ Graph.prototype = {
       after();
     }, this);
 
-    var g = this.options.grid;
+    g = this.options.grid;
 
     if (g && g.backgroundImage) {
       if (_.isString(g.backgroundImage)){
@@ -269,13 +270,13 @@ Graph.prototype = {
         g.backgroundImage = _.extend({left: 0, top: 0}, g.backgroundImage);
       }
 
-      var img = new Image();
+      img = new Image();
       img.onload = _.bind(function() {
-        var left = this.plotOffset.left + (parseInt(g.backgroundImage.left, 10) || 0);
-        var top = this.plotOffset.top + (parseInt(g.backgroundImage.top, 10) || 0);
-
-        // Store the global alpha to restore it later on.
-        var globalAlpha = this.ctx.globalAlpha;
+        var
+          left = this.plotOffset.left + (parseInt(g.backgroundImage.left, 10) || 0),
+          top = this.plotOffset.top + (parseInt(g.backgroundImage.top, 10) || 0),
+          // Store the global alpha to restore it later on.
+          globalAlpha = this.ctx.globalAlpha;
 
         // When the watermarkAlpha is < 1 then the watermark is transparent.
         this.ctx.globalAlpha = (g.backgroundImage.alpha||globalAlpha);
@@ -301,18 +302,18 @@ Graph.prototype = {
    * Actually draws the graph.
    * @param {Object} series - series to draw
    */
-  drawSeries: function(series){
+  drawSeries: function (series) {
     series = series || this.series;
 
     var drawn = false;
     _.each(flotr.graphTypes, function(handler, name) {
-      if(series[name] && series[name].show){
+      if (series[name] && series[name].show) {
         drawn = true;
         handler.draw.call(this, series);
       }
     }, this);
 
-    if(!drawn){
+    if (!drawn) {
       this[this.options.defaultType].draw(series);
     }
   },
@@ -321,15 +322,16 @@ Graph.prototype = {
    * @param {Event} event - Mouse Event object.
    * @return {Object} Object with coordinates of the mouse.
    */
-  getEventPosition: function (e){
+  getEventPosition: function (e) {
 
-    var d = document,
-        r = this.overlay.getBoundingClientRect(),
-        pointer = E.eventPointer(e),
-        rx = e.clientX - d.body.scrollLeft - d.documentElement.scrollLeft - r.left - this.plotOffset.left,
-        ry = e.clientY - d.body.scrollTop - d.documentElement.scrollTop - r.top - this.plotOffset.top,
-        dx = pointer.x - this.lastMousePos.pageX,
-        dy = pointer.y - this.lastMousePos.pageY;
+    var
+      d = document,
+      r = this.overlay.getBoundingClientRect(),
+      pointer = E.eventPointer(e),
+      rx = e.clientX - d.body.scrollLeft - d.documentElement.scrollLeft - r.left - this.plotOffset.left,
+      ry = e.clientY - d.body.scrollTop - d.documentElement.scrollTop - r.top - this.plotOffset.top,
+      dx = pointer.x - this.lastMousePos.pageX,
+      dy = pointer.y - this.lastMousePos.pageY;
 
     return {
       x:  this.axes.x.p2d(rx),
@@ -348,8 +350,8 @@ Graph.prototype = {
    * Observes the 'click' event and fires the 'flotr:click' event.
    * @param {Event} event - 'click' Event object.
    */
-  clickHandler: function(event){
-    if(this.ignoreClick){
+  clickHandler: function (event) {
+    if (this.ignoreClick) {
       this.ignoreClick = false;
       return this.ignoreClick;
     }
@@ -359,7 +361,7 @@ Graph.prototype = {
    * Observes mouse movement over the graph area. Fires the 'flotr:mousemove' event.
    * @param {Event} event - 'mousemove' Event object.
    */
-  mouseMoveHandler: function(event){
+  mouseMoveHandler: function (event) {
     var pos = this.getEventPosition(event);
     this.lastMousePos.pageX = pos.absX;
     this.lastMousePos.pageY = pos.absY;
@@ -369,7 +371,7 @@ Graph.prototype = {
    * Observes the 'mousedown' event.
    * @param {Event} event - 'mousedown' Event object.
    */
-  mouseDownHandler: function (event){
+  mouseDownHandler: function (event) {
 
     /*
     // @TODO Context menu?
@@ -397,20 +399,21 @@ Graph.prototype = {
    * Observes the mouseup event for the document.
    * @param {Event} event - 'mouseup' Event object.
    */
-  mouseUpHandler: function(event){
+  mouseUpHandler: function(event) {
     E.stopObserving(document, 'mouseup', this.mouseUpHandler);
     // @TODO why?
     //event.stop();
     E.fire(this.el, 'flotr:mouseup', [event, this]);
   },
   drawTooltip: function(content, x, y, options) {
-    var mt = this.getMouseTrack(),
-        style = 'opacity:0.7;background-color:#000;color:#fff;display:none;position:absolute;padding:2px 8px;-moz-border-radius:4px;border-radius:4px;white-space:nowrap;',
-        p = options.position,
-        m = options.margin,
-        plotOffset = this.plotOffset;
+    var
+      mt = this.getMouseTrack(),
+      style = 'opacity:0.7;background-color:#000;color:#fff;display:none;position:absolute;padding:2px 8px;-moz-border-radius:4px;border-radius:4px;white-space:nowrap;',
+      p = options.position,
+      m = options.margin,
+      plotOffset = this.plotOffset;
 
-    if(x !== null && y !== null){
+    if (x !== null && y !== null) {
       if (!options.relative) { // absolute to the canvas
              if(p.charAt(0) == 'n') style += 'top:' + (m + plotOffset.top) + 'px;bottom:auto;';
         else if(p.charAt(0) == 's') style += 'bottom:' + (m + plotOffset.bottom) + 'px;top:auto;';
@@ -459,18 +462,18 @@ Graph.prototype = {
     }
   },
 
-  _initMembers: function() {
+  _initMembers: function () {
     this._handles = [];
-    this.lastMousePos = {pageX: null, pageY: null };
-    this.plotOffset = {left: 0, right: 0, top: 0, bottom: 0};
+    this.lastMousePos = { pageX: null, pageY: null };
+    this.plotOffset = { left: 0, right: 0, top: 0, bottom: 0 };
     this.ignoreClick = false;
     this.prevHit = null;
   },
 
-  _initGraphTypes: function() {
-    _.each(flotr.graphTypes, function(handler, graphType){
+  _initGraphTypes: function () {
+    _.each(flotr.graphTypes, function (handler, graphType){
       this[graphType] = _.clone(handler);
-      _.each(handler, function(fn, name){
+      _.each(handler, function (fn, name){
         if (_.isFunction(fn))
           this[graphType][name] = _.bind(fn, this);
       }, this);
@@ -480,13 +483,14 @@ Graph.prototype = {
 
   _initEvents: function () {
 
+    var touchEndHandler;
     this.
       _observe(this.overlay, 'mousedown', _.bind(this.mouseDownHandler, this)).
       _observe(this.el, 'mousemove', _.bind(this.mouseMoveHandler, this)).
       _observe(this.overlay, 'click', _.bind(this.clickHandler, this));
 
 
-    var touchEndHandler = _.bind(function (e) {
+    touchEndHandler = _.bind(function (e) {
       E.stopObserving(document, 'touchend', touchEndHandler);
       E.fire(this.el, 'flotr:mouseup', [event, this]);
     }, this);
@@ -499,10 +503,10 @@ Graph.prototype = {
     this._observe(this.overlay, 'touchmove', _.bind(function (e) {
 
       e.preventDefault();
-
-      var pageX = e.touches[0].pageX,
+      var
+        pageX = e.touches[0].pageX,
         pageY = e.touches[0].pageY,
-        pos = this.getEventPosition(e.touches[0]);
+        pos   = this.getEventPosition(e.touches[0]);
 
       this.lastMousePos.pageX = pageX;
       this.lastMousePos.pageY = pageY;
@@ -515,16 +519,17 @@ Graph.prototype = {
    * of excanvas. The overlay canvas is inserted for displaying interactions. After the canvas elements
    * are created, the elements are inserted into the container element.
    */
-  _initCanvas: function(){
-    var el = this.el,
-      o = this.options,
+  _initCanvas: function () {
+    var
+      el = this.el,
+      o  = this.options,
       size, style;
 
     D.empty(el);
-    D.setStyles(el, {position: 'relative', cursor: el.style.cursor || 'default'}); // For positioning labels and overlay.
+    D.setStyles(el, { position: 'relative', cursor: el.style.cursor || 'default' }); // For positioning labels and overlay.
     size = D.size(el);
 
-    if(size.width <= 0 || size.height <= 0 || o.resolution <= 0){
+    if (size.width <= 0 || size.height <= 0 || o.resolution <= 0) {
       throw 'Invalid dimensions for plot, width = ' + size.width + ', height = ' + size.height + ', resolution = ' + o.resolution;
     }
 
@@ -540,13 +545,13 @@ Graph.prototype = {
     this.canvasWidth = size.width*o.resolution;
     this.textEnabled = !!this.ctx.drawText; // Enable text functions
 
-    function getCanvas(canvas, name){
-      if(!canvas){
+    function getCanvas (canvas, name){
+      if (!canvas) {
         canvas = D.create('canvas');
         canvas.className = 'flotr-'+name;
         canvas.style.cssText = 'position:absolute;left:0px;top:0px;';
       }
-      _.each(size, function(size, attribute){
+      _.each(size, function (size, attribute){
         canvas.setAttribute(attribute, size*o.resolution);
         canvas.style[attribute] = size+'px';
         D.show(canvas);
@@ -556,18 +561,19 @@ Graph.prototype = {
       return canvas;
     }
 
-    function getContext(canvas){
-      if(window.G_vmlCanvasManager) window.G_vmlCanvasManager.initElement(canvas); // For ExCanvas
+    function getContext (canvas) {
+      if (window.G_vmlCanvasManager) window.G_vmlCanvasManager.initElement(canvas); // For ExCanvas
       var context = canvas.getContext('2d');
-      if(!window.G_vmlCanvasManager) context.scale(o.resolution, o.resolution);
+      if (!window.G_vmlCanvasManager) context.scale(o.resolution, o.resolution);
+
       return context;
     }
   },
 
-  _initPlugins: function(){
+  _initPlugins: function () {
     // TODO Should be moved to flotr and mixed in.
-    _.each(flotr.plugins, function(plugin, name){
-      _.each(plugin.callbacks, function(fn, c){
+    _.each(flotr.plugins, function (plugin, name) {
+      _.each(plugin.callbacks, function (fn, c) {
         this._observe(this.el, c, _.bind(fn, this));
       }, this);
       this[name] = _.clone(plugin);
@@ -582,7 +588,7 @@ Graph.prototype = {
    * Sets options and initializes some variables and color specific values, used by the constructor.
    * @param {Object} opts - options object
    */
-  _initOptions: function(opts){
+  _initOptions: function (opts) {
     var options = flotr.clone(flotr.defaultOptions);
     options.x2axis = _.extend(_.clone(options.xaxis), options.x2axis);
     options.y2axis = _.extend(_.clone(options.yaxis), options.y2axis);
@@ -600,31 +606,31 @@ Graph.prototype = {
     }
 
     // Initialize some variables used throughout this function.
-    var assignedColors = [],
-        colors = [],
-        ln = this.series.length,
-        neededColors = this.series.length,
-        oc = this.options.colors,
-        usedColors = [],
-        variation = 0,
-        c, i, j, s;
+    var
+      assignedColors = [],
+      colors         = [],
+      neededColors   = ln = this.series.length,
+      oc             = this.options.colors,
+      usedColors     = [],
+      variation      = 0,
+      c, i, j, s, t;
 
     // Collect user-defined colors from series.
-    for(i = neededColors - 1; i > -1; --i){
+    for (i = neededColors - 1; i > -1; --i) {
       c = this.series[i].color;
-      if(c){
+      if (c) {
         --neededColors;
-        if(_.isNumber(c)) assignedColors.push(c);
+        if (_.isNumber(c)) assignedColors.push(c);
         else usedColors.push(flotr.Color.parse(c));
       }
     }
 
     // Calculate the number of colors that need to be generated.
-    for(i = assignedColors.length - 1; i > -1; --i)
+    for (i = assignedColors.length - 1; i > -1; --i) {
       neededColors = Math.max(neededColors, assignedColors[i] + 1);
-
+    }
     // Generate needed number of colors.
-    for(i = 0; colors.length < neededColors;){
+    for (i = 0; colors.length < neededColors;) {
       c = (oc.length == i) ? new flotr.Color(100, 100, 100) : flotr.Color.parse(oc[i]);
 
       // Make sure each serie gets a different color.
@@ -637,43 +643,46 @@ Graph.prototype = {
        */
       colors.push(c);
 
-      if(++i >= oc.length){
+      if (++i >= oc.length) {
         i = 0;
         ++variation;
       }
     }
 
     // Fill the options with the generated colors.
-    for(i = 0, j = 0; i < ln; ++i){
+    for (i = 0, j = 0; i < ln; ++i) {
       s = this.series[i];
-console.log(s.shadowSize);
       // Assign the color.
-      if (!s.color){
+      if (!s.color) {
         s.color = colors[j++].toString();
-      }else if(_.isNumber(s.color)){
+      }else if (_.isNumber(s.color)) {
         s.color = colors[s.color].toString();
       }
 
       // Every series needs an axis
-      if (!s.xaxis) s.xaxis = this.axes.x;
-           if (s.xaxis == 1) s.xaxis = this.axes.x;
-      else if (s.xaxis == 2) s.xaxis = this.axes.x2;
+      if (!s.xaxis) {
+        s.xaxis = this.axes.x;
+      }
+      if (s.xaxis === 1) { s.xaxis = this.axes.x; }
+      else if (s.xaxis === 2) { s.xaxis = this.axes.x2; }
 
-      if (!s.yaxis) s.yaxis = this.axes.y;
-           if (s.yaxis == 1) s.yaxis = this.axes.y;
-      else if (s.yaxis == 2) s.yaxis = this.axes.y2;
+      if (!s.yaxis) {
+        s.yaxis = this.axes.y;
+      }
+      if (s.yaxis === 1) { s.yaxis = this.axes.y; }
+      else if (s.yaxis === 2) { s.yaxis = this.axes.y2; }
 
       // Apply missing options to the series.
-      for (var t in flotr.graphTypes){
+      for (t in flotr.graphTypes) {
         s[t] = _.extend(_.clone(this.options[t]), s[t]);
       }
       s.mouse = _.extend(_.clone(this.options.mouse), s.mouse);
 
-      if(s.shadowSize === undefined) s.shadowSize = this.options.shadowSize;
+      if (s.shadowSize === undefined) s.shadowSize = this.options.shadowSize;
     }
   },
 
-  _setEl: function(el) {
+  _setEl: function (el) {
     if (!el) throw 'The target container doesn\'t exist';
     if (!el.clientWidth) throw 'The target container must be visible';
     this.el = el;
