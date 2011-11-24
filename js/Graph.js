@@ -271,8 +271,8 @@ Graph.prototype = {
 
       var img = new Image();
       img.onload = _.bind(function() {
-        var left = this.plotOffset.left + (parseInt(g.backgroundImage.left) || 0);
-        var top = this.plotOffset.top + (parseInt(g.backgroundImage.top) || 0);
+        var left = this.plotOffset.left + (parseInt(g.backgroundImage.left, 10) || 0);
+        var top = this.plotOffset.top + (parseInt(g.backgroundImage.top, 10) || 0);
 
         // Store the global alpha to restore it later on.
         var globalAlpha = this.ctx.globalAlpha;
@@ -646,9 +646,9 @@ Graph.prototype = {
     // Fill the options with the generated colors.
     for(i = 0, j = 0; i < ln; ++i){
       s = this.series[i];
-
+console.log(s.shadowSize);
       // Assign the color.
-      if(s.color == null){
+      if (!s.color){
         s.color = colors[j++].toString();
       }else if(_.isNumber(s.color)){
         s.color = colors[s.color].toString();
@@ -669,7 +669,7 @@ Graph.prototype = {
       }
       s.mouse = _.extend(_.clone(this.options.mouse), s.mouse);
 
-      if(s.shadowSize == null) s.shadowSize = this.options.shadowSize;
+      if(s.shadowSize === undefined) s.shadowSize = this.options.shadowSize;
     }
   },
 
